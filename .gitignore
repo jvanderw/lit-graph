@@ -1,0 +1,11 @@
+# Files for git to ignore
+
+# emacs files
+*~
+.emacs.desktop*
+
+# Others
+*.pdf
+*.ps
+*.dot
+*.png
