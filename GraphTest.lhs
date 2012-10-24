@@ -47,6 +47,10 @@ Simple utility functions to get the values out of a triple.
 > thrdOfTrip         :: (a,b,c) -> c
 > thrdOfTrip (_,_,c) = c
 
+--------------------------------------------------------------------------------
+
+Static graph
+
 > v1 = ("Count", 1, [3,4])
 > v2 = ("Danglars", 3, [1,4])
 > v3 = ("Calderrouse", 4, [1,3])
@@ -88,8 +92,9 @@ mutiple edges between all the nodes in the graph.
 > mkUndirGraph   :: Gr a b -> Gr a b
 > mkUndirGraph g = mkGraph (labNodes g) (rmDupEdg (labEdges g))
 
-Make a graph out of the nodes and edges and send it to the graphviz
-library to get a representation of it.
+--------------------------------------------------------------------------------
+
+Main routine to create *.dot files for the graphs we're playing with.
 
 > main :: IO()
 > main = do

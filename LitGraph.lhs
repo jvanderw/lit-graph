@@ -102,6 +102,28 @@ characters that they have been identified as being connected to.
 
 --------------------------------------------------------------------------------
 
+Functions for creating undirected versions of a LitGraph.
+
+For undirected graphs, edges such as (1,2) and (2,1) are
+"equal". Currently assume that all egdes are LEdges, but that they
+don't actually have meaningful labels. These edges need to be removed
+before the graph is passed on to graphvizDir, otherwise there will be
+mutiple edges between all the nodes in the graph.
+
+> eqEdg :: LEdge a -> LEdge a -> Bool
+> eqEdg (x,y,_) (m,n,_) | x == n && y == m = True
+>                       | x == m && y == n = True
+>                       | otherwise = False
+
+> rmDupEdg    :: [LEdge a] -> [LEdge a]
+> rmDupEdg []     = []
+> rmDupEdg (x:xs) = x : rmDupEdg (filter (\y -> not(eqEdg x y)) xs)
+
+> mkUndirGraph   :: Gr a b -> Gr a b
+> mkUndirGraph g = mkGraph (labNodes g) (rmDupEdg (labEdges g))
+
+--------------------------------------------------------------------------------
+
 Test graph
 
 > n1 = (1, Character "Count")
