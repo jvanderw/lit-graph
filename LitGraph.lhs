@@ -52,6 +52,8 @@ edges of the graph.
 >                            }
 >                  deriving (Show, Eq)
 
+> type LitGraph = Gr Character ()
+
 --------------------------------------------------------------------------------
 
 Utility functions
@@ -86,12 +88,12 @@ Adding and removing characters from the graph
 
 > addCharacter        :: Character 
 >                        -> [Node]
->                        -> Gr Character ()
->                        -> Gr Character ()
+>                        -> LitGraph
+>                        -> LitGraph
 > addCharacter c ns g = addEdges (n,c) ns (addNode c n g)
 >     where n = head (newNodes 1 g)
 
-> addNode       :: Character -> Node -> Gr Character () -> Gr Character ()
+> addNode       :: Character -> Node -> LitGraph -> LitGraph
 > addNode c n g = insNode (n,c) g
 
 Create connections going both to and from the new character and the
@@ -99,36 +101,14 @@ characters that they have been identified as being connected to.
 
 > addEdges        :: LNode Character 
 >                    -> [Node]
->                    -> Gr Character () 
->                    -> Gr Character ()
+>                    -> LitGraph 
+>                    -> LitGraph
 > addEdges n ns g = addEdges' ([(x,fst n, ()) | x <- ns]
 >                              ++ [ (fst n,x,()) | x <- ns]) g
 
-> addEdges'          :: [LEdge ()] -> Gr Character () -> Gr Character ()
+> addEdges'          :: [LEdge ()] -> LitGraph -> LitGraph
 > addEdges' [] g     = g
 > addEdges' (e:es) g = addEdges' es (insEdge e g) 
-
---------------------------------------------------------------------------------
-
-Functions for creating undirected versions of a LitGraph.
-
-For undirected graphs, edges such as (1,2) and (2,1) are
-"equal". Currently assume that all egdes are LEdges, but that they
-don't actually have meaningful labels. These edges need to be removed
-before the graph is passed on to graphvizDir, otherwise there will be
-mutiple edges between all the nodes in the graph.
-
-> eqEdg :: LEdge a -> LEdge a -> Bool
-> eqEdg (x,y,_) (m,n,_) | x == n && y == m = True
->                       | x == m && y == n = True
->                       | otherwise = False
-
-> rmDupEdg    :: [LEdge a] -> [LEdge a]
-> rmDupEdg []     = []
-> rmDupEdg (x:xs) = x : rmDupEdg (filter (\y -> not(eqEdg x y)) xs)
-
-> mkUndirGraph   :: Gr a b -> Gr a b
-> mkUndirGraph g = mkGraph (labNodes g) (rmDupEdg (labEdges g))
 
 --------------------------------------------------------------------------------
 
@@ -144,5 +124,5 @@ Test graph
 > e4 = (3,1)
 > e5 = (2,3)
 
-> graph1 :: Gr Character ()
+> graph1 :: LitGraph
 > graph1 = mkGraph [n1,n2,n3] (labUEdges [e1,e2,e3,e4,e5])
