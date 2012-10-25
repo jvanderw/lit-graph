@@ -37,7 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 module GraphvizDirected(
     Orient(..),
     Directed(..),
-    graphvizDir, graphvizDir'
+    graphvizDir,
+    graphvizDir',
+    graphvizUndir'
 ) where
 
 import Data.Graph.Inductive.Graph
@@ -103,6 +105,11 @@ graphvizDir g t (w, h) p@(pw', ph') o d =
 -- 8.5x11 pages, one page, landscape orientation, digraph
 graphvizDir' :: (Graph g, Show a, Show b) => g a b -> String
 graphvizDir' g = graphvizDir g "fgl" (8.5,11.0) (1,1) Landscape True
+
+-- | Format a graph for graphviz with reasonable defaults: title of \"fgl\",
+-- 8.5x11 pages, one page, landscape orientation, undirected graph
+graphvizUndir' :: (Graph g, Show a, Show b) => g a b -> String
+graphvizUndir' g = graphvizDir g "fgl" (8.5,11.0) (1,1) Landscape False
 
 sq :: String -> String
 sq s@[c]                     = s
