@@ -49,8 +49,11 @@ as the nodes of the graph. Connections between characters are the
 edges of the graph.
 
 > data Character = Character { name :: String
->                            }
->                  deriving (Show, Eq)
+>                         }
+>                    deriving (Eq,Ord)
+
+> instance Show Character where
+>     show c = show (name c)
 
 > type LitGraph = Gr Character ()
 
@@ -109,6 +112,15 @@ characters that they have been identified as being connected to.
 > addEdges'          :: [LEdge ()] -> LitGraph -> LitGraph
 > addEdges' [] g     = g
 > addEdges' (e:es) g = addEdges' es (insEdge e g) 
+
+--------------------------------------------------------------------------------
+
+Writing and reading - specifically to files.
+
+Writing out a LitGraph, each node will start with the Character data and then a simple list of edges.
+
+> write :: LitGraph -> String
+> write g = undefined
 
 --------------------------------------------------------------------------------
 
