@@ -19,3 +19,38 @@ The lit-graph code is licensed under the BSD 3-clause license. Please
 see the COPYING file in the projects top level directory, or
 http://opensource.org/licenses/bsd-3-clause.
 
+
+USAGE
+=====
+
+Currently, LitGraph can be run from within GHCI navigating to the
+lit-graph directory, starting GHCI and entering:
+
+Prelude> :l LitGraphCLI
+*LitGraphCLI> main
+
+This will open a simple command line interface. LitGraphs start out as
+empty, so the first character added will have no
+connections. Subsequent characters can be connected to existing
+characters through their node number.
+
+Once a graph is built, it can be exported to a *.dot file that can be
+rendered using graphviz's fdp command. See the fdp man page for more
+detail.
+
+TODO
+====
+
+Features that i want to add to LitGraph:
+
+- Ability to get and display the degree of each character node. The
+  degree should give some idea of how "important" the character is in
+  the story.
+
+- Ability to get the length of the path between characters. This would
+  give an idea of how connected one character is to another.
+
+- Support temporary removal of a character from the graph. With this,
+  the path length becomes more interesting, since it could then be
+  determined if two characters are connected only through the removed
+  character.
