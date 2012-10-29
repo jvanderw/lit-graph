@@ -40,6 +40,7 @@ and querying LitGraphs.
 > import LitGraph
 > import GraphvizDirected
 > import Data.Graph.Inductive
+> import Control.Monad.IO.Class
 
 --------------------------------------------------------------------------------
 
@@ -67,24 +68,53 @@ a 'while' loop.
 >          putStrLn "Current character graph components:"
 >          putStrLn (show g)
 >          putStrLn "Menu Options"
->          putStr "\t1 - Add character to graph\n\t2 - Export to *.dot file\n\t3 - quit\n"
+>          putStr ("\t1 - Add character to graph\n"
+>                 ++ "\t2 - Export to *.dot file\n"
+>                 ++ "\t3 - Load graph from LitGraph generated *.dot file\n"
+>                 ++ "\t4 - quit\n> ")
 >          choice <- getLine
->          if choice == "1"
->          then do
->               putStr "Enter character name: "
->               name <- getLine
->               putStr ("Characters " ++ name ++ " is connected to: ")
->               connections <- getLine
->               putStrLn "Adding to graph..."
->               menu (addCharacter (Character name) (toList connections) g)
->          else if choice == "2"
->               then do
->                    putStr "File name: "
->                    fileName <- getLine
->                    writeFile fileName $ graphvizUndir' (mkUndirGraph g)
->          else putStrLn "Exiting menu..."
+>          case choice of
+>                      "1" -> addParams >>= \p ->
+>                             menu (addCharacter (fst p) (snd p) g)
+>                      "2" -> export g >> menu g
+>                      "3" -> importDot >>= \g2 -> menu g2
+>                      "4" -> putStrLn "Exiting menu..."
+>                      _   -> putStrLn "Not a valid menu option."
+
+--------------------------------------------------------------------------------
+
+Functions that handle th various menu options available.
+
+Get character and its list of connections.
+FIXME: Validate the input - don't allow empty strings, or lists that don't
+       contain valid node numbers
+
+> addParams :: IO (Character, [Int])
+> addParams = putStr "Enter character name: " >>
+>             getLine >>= \name ->
+>             putStr ("Characters " ++ name ++ " is connected to: ") >>
+>             getLine >>= \connects ->
+>             return (Character name, toList connects)
 
 Convert the input from a string into [Int]
 
-> toList :: String -> [Int]
+> toList   :: String -> [Int]
 > toList s = read ("[" ++ s ++ "]")
+
+Write the graph out to a *.dot file.
+FIXME: Get input for more graph parameters like page size, rotation, etc.
+
+> export   :: LitGraph -> IO ()
+> export g = putStr "File name: " >>
+>            getLine >>= \fname ->
+>            writeFile fname $ graphvizUndir' (mkUndirGraph g)
+
+Read in a graph from a given *.dot file.
+FIXME: Need import functionallity in LitGraph module, currently this
+       just returns an empty graph
+
+> importDot :: IO LitGraph
+> importDot = putStr "Enter name of file to import: " >>
+>             getLine >>= \fname ->
+>             putStrLn ("Opening " ++ fname) >>
+>             return empty
