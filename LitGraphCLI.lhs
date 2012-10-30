@@ -66,7 +66,7 @@ a 'while' loop.
 > menu :: LitGraph -> IO ()
 > menu g = do
 >          putStrLn "Current character graph components:"
->          putStrLn (show g)
+>          print g
 >          putStrLn "Menu Options"
 >          putStr ("\t1 - Add character to graph\n"
 >                 ++ "\t2 - Export to *.dot file\n"
@@ -75,7 +75,7 @@ a 'while' loop.
 >          choice <- getLine
 >          case choice of
 >                      "1" -> addParams >>= \p ->
->                             menu (addCharacter (fst p) (snd p) g)
+>                             menu (uncurry addCharacter p g)
 >                      "2" -> export g >> menu g
 >                      "3" -> importDot >>= \g2 -> menu g2
 >                      "4" -> putStrLn "Exiting menu..."

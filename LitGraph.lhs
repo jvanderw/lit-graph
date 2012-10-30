@@ -65,13 +65,6 @@ Utility functions
 > labUEdges :: [Edge] -> [UEdge]
 > labUEdges = map (\(i,j) -> (i,j,()))
 
-Version of Data.Graph.Inductive.Graph.insNode that can be used with
-folds when there is a list of node that need to be added to the graph.
-
-> insNodef     :: Gr a b -> LNode a -> Gr a b
-> insNodef g n = insNode n g
-
-
 --------------------------------------------------------------------------------
 Conversion functions for handling undirected graphs
 
@@ -88,7 +81,7 @@ mutiple edges between all the nodes in the graph.
 
 > rmDupEdg    :: [LEdge a] -> [LEdge a]
 > rmDupEdg []     = []
-> rmDupEdg (x:xs) = x : rmDupEdg (filter (\y -> not(eqEdg x y)) xs)
+> rmDupEdg (x:xs) = x : rmDupEdg (filter (not . eqEdg x ) xs)
 
 > mkUndirGraph   :: Gr a b -> Gr a b
 > mkUndirGraph g = mkGraph (labNodes g) (rmDupEdg (labEdges g))
@@ -105,7 +98,7 @@ Adding and removing characters from the graph
 >     where n = head (newNodes 1 g)
 
 > addNode       :: Character -> Node -> LitGraph -> LitGraph
-> addNode c n g = insNode (n,c) g
+> addNode c n = insNode (n,c)
 
 Create connections going both to and from the new character and the
 characters that they have been identified as being connected to.
@@ -114,12 +107,11 @@ characters that they have been identified as being connected to.
 >                    -> [Node]
 >                    -> LitGraph 
 >                    -> LitGraph
-> addEdges n ns g = addEdges' ([(x,fst n, ()) | x <- ns]
->                              ++ [ (fst n,x,()) | x <- ns]) g
+> addEdges n ns = addEdges' ([(x,fst n, ()) | x <- ns]
+>                              ++ [ (fst n,x,()) | x <- ns])
 
 > addEdges'          :: [LEdge ()] -> LitGraph -> LitGraph
-> addEdges' [] g     = g
-> addEdges' (e:es) g = addEdges' es (insEdge e g) 
+> addEdges' es g     = foldl (flip insEdge) g es
 
 --------------------------------------------------------------------------------
 
@@ -142,16 +134,16 @@ file, pull out all the character nodes and add them to the graph.
 > nodeNum s = read (s =~ "[1-9][0-9]*")
 
 > nodeLabel   :: String -> String
-> nodeLabel s = filter (\x -> not (x == '"')) (s =~ "\".*\"")
+> nodeLabel s = filter (/= '"') (s =~ "\".*\"")
 
 > allNodes        :: [String] -> [LNode Character]
 > allNodes []     = []
-> allNodes (x:xs) = case isNode x of
->                     True  -> (nodeNum x, Character (nodeLabel x)) : allNodes xs
->                     False -> allNodes xs
+> allNodes (x:xs) =   if isNode x
+>                     then (nodeNum x, Character (nodeLabel x)) : allNodes xs
+>                     else allNodes xs
 
-> addDotNodes      :: LitGraph -> [LNode Character] -> LitGraph
-> addDotNodes g ns = foldl insNodef g ns
+> addDotNodes :: LitGraph -> [LNode Character] -> LitGraph
+> addDotNodes = foldl (flip insNode)
 
 Get the edges of the graph. We can use the existing addEdges function.
 
@@ -163,9 +155,9 @@ Get the edges of the graph. We can use the existing addEdges function.
 
 > allEdges        :: [String] -> [LEdge ()]
 > allEdges []     = []
-> allEdges (x:xs) = case isEdge x of
->                     True -> (edgeNode x) : allEdges xs
->                     False -> allEdges xs
+> allEdges (x:xs) = if isEdge x 
+>                   then edgeNode x : allEdges xs
+>                   else allEdges xs
 
 
 Get the nodes and the edges, and return the graph. But, before
