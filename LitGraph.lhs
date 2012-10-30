@@ -144,7 +144,7 @@ file, pull out all the character nodes and add them to the graph.
 > nodeLabel   :: String -> String
 > nodeLabel s = filter (\x -> not (x == '"')) (s =~ "\".*\"")
 
-> allNodes    :: [String] -> [LNode Character]
+> allNodes        :: [String] -> [LNode Character]
 > allNodes []     = []
 > allNodes (x:xs) = case isNode x of
 >                     True  -> (nodeNum x, Character (nodeLabel x)) : allNodes xs
@@ -153,7 +153,20 @@ file, pull out all the character nodes and add them to the graph.
 > addDotNodes      :: LitGraph -> [LNode Character] -> LitGraph
 > addDotNodes g ns = foldl insNodef g ns
 
-Get the edges of the graph
+Get the edges of the graph. We can use the existing addEdges function.
+
+> isEdge   :: String -> Bool
+> isEdge s = s =~ "[0-9]+ -- [0-9]+"
+
+> edgeNode   :: String -> LEdge ()
+> edgeNode s = (read (s =~ "[0-9]+"), read (s =~ "[0-9]+$"), ())
+
+> allEdges        :: [String] -> [LEdge ()]
+> allEdges []     = []
+> allEdges (x:xs) = case isEdge x of
+>                     True -> (edgeNode x) : allEdges xs
+>                     False -> allEdges xs
+
 
 Get the nodes and the edges, and return the graph. But, before
 returning it, make sure that it is an undirected graph. Remember,
@@ -163,7 +176,9 @@ nodes in the *.dot file, then multiple egdes are rendered in the graph
 be put back when the graph is read in.
 
 > dot2LitGr   :: String -> LitGraph
-> dot2LitGr s = undir $ addDotNodes empty $ allNodes $ lines s
+> dot2LitGr s = undir 
+>               $ addEdges' (allEdges xs) $ addDotNodes empty $ allNodes xs
+>     where xs = lines s
 
 --------------------------------------------------------------------------------
 Test graph
