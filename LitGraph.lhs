@@ -39,6 +39,7 @@ Data.Graph.Inductive. Perhaps there is a better way to handle this.
 > import Data.Graph.Inductive hiding (Landscape, Portrait)
 > import Data.Graph.Inductive.Graph
 > import GraphvizDirected
+> import Text.Regex.Posix hiding (empty)
 
 --------------------------------------------------------------------------------
 
@@ -63,6 +64,13 @@ Utility functions
 
 > labUEdges :: [Edge] -> [UEdge]
 > labUEdges = map (\(i,j) -> (i,j,()))
+
+Version of Data.Graph.Inductive.Graph.insNode that can be used with
+folds when there is a list of node that need to be added to the graph.
+
+> insNodef     :: Gr a b -> LNode a -> Gr a b
+> insNodef g n = insNode n g
+
 
 --------------------------------------------------------------------------------
 Conversion functions for handling undirected graphs
@@ -115,15 +123,49 @@ characters that they have been identified as being connected to.
 
 --------------------------------------------------------------------------------
 
-Writing and reading - specifically to files.
-
-Writing out a LitGraph, each node will start with the Character data and then a simple list of edges.
+Writing a out the LitGraph to a *.dot file.
 
 > write :: LitGraph -> String
 > write g = undefined
 
 --------------------------------------------------------------------------------
 
+Reading LitGraph from a LitGraph generated *.dot file.
+
+First, given a list of strings which constitue the contents of a *.dot
+file, pull out all the character nodes and add them to the graph.
+
+> isNode   :: String -> Bool
+> isNode s = s =~ "label"
+
+> nodeNum   :: String -> Int
+> nodeNum s = read (s =~ "[1-9][0-9]*")
+
+> nodeLabel   :: String -> String
+> nodeLabel s = filter (\x -> not (x == '"')) (s =~ "\".*\"")
+
+> allNodes    :: [String] -> [LNode Character]
+> allNodes []     = []
+> allNodes (x:xs) = case isNode x of
+>                     True  -> (nodeNum x, Character (nodeLabel x)) : allNodes xs
+>                     False -> allNodes xs
+
+> addDotNodes      :: LitGraph -> [LNode Character] -> LitGraph
+> addDotNodes g ns = foldl insNodef g ns
+
+Get the edges of the graph
+
+Get the nodes and the edges, and return the graph. But, before
+returning it, make sure that it is an undirected graph. Remember,
+LitGraphs are undirected, but if there are multiple edges between
+nodes in the *.dot file, then multiple egdes are rendered in the graph
+- so they are removed before the *.dot file is generated. They need to
+be put back when the graph is read in.
+
+> dot2LitGr   :: String -> LitGraph
+> dot2LitGr s = undir $ addDotNodes empty $ allNodes $ lines s
+
+--------------------------------------------------------------------------------
 Test graph
 
 > n1 = (1, Character "Count")

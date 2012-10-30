@@ -79,7 +79,8 @@ a 'while' loop.
 >                      "2" -> export g >> menu g
 >                      "3" -> importDot >>= \g2 -> menu g2
 >                      "4" -> putStrLn "Exiting menu..."
->                      _   -> putStrLn "Not a valid menu option."
+>                      _   -> putStrLn "Not a valid menu option." >>
+>                             menu g
 
 --------------------------------------------------------------------------------
 
@@ -117,4 +118,5 @@ FIXME: Need import functionallity in LitGraph module, currently this
 > importDot = putStr "Enter name of file to import: " >>
 >             getLine >>= \fname ->
 >             putStrLn ("Opening " ++ fname) >>
->             return empty
+>             readFile fname >>= \s ->
+>             return (dot2LitGr s)
