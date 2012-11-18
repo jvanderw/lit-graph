@@ -39,7 +39,9 @@ Data.Graph.Inductive. Perhaps there is a better way to handle this.
 > import Data.Graph.Inductive hiding (Landscape, Portrait)
 > import Data.Graph.Inductive.Graph
 > import GraphvizDirected
-> import Text.Regex.Posix hiding (empty)
+> import Text.Regex.Posix hiding (empty, match)
+> import Data.List
+> import Data.Maybe
 
 --------------------------------------------------------------------------------
 
@@ -88,7 +90,9 @@ mutiple edges between all the nodes in the graph.
 
 --------------------------------------------------------------------------------
 
-Adding and removing characters from the graph
+Adding and removing characters from the graph.
+
+Adding characters.
 
 > addCharacter        :: Character 
 >                        -> [Node]
@@ -108,10 +112,25 @@ characters that they have been identified as being connected to.
 >                    -> LitGraph 
 >                    -> LitGraph
 > addEdges n ns = addEdges' ([(x,fst n, ()) | x <- ns]
->                              ++ [ (fst n,x,()) | x <- ns])
+>                            ++ [ (fst n,x,()) | x <- ns])
 
 > addEdges'          :: [LEdge ()] -> LitGraph -> LitGraph
 > addEdges' es g     = foldl (flip insEdge) g es
+
+Removing characters from the graph
+
+> rmCharByName      :: String -> LitGraph -> (Maybe (LNode Character), LitGraph)
+> rmCharByName s g = let r = getNodeByChar s g in
+>                        case r of
+>                          Just (n,c) -> (Just (n,c), snd (match n g))
+>                          Nothing    -> (Nothing, g)
+
+> getNodeByChar     :: String -> LitGraph -> Maybe (LNode Character)
+> getNodeByChar s g = find (\x -> isCharacterMatch s x) ns
+>     where ns = labNodes g
+
+> isCharacterMatch     :: String -> LNode Character -> Bool
+> isCharacterMatch s n = name (snd n) == s
 
 --------------------------------------------------------------------------------
 
@@ -178,12 +197,16 @@ Test graph
 > n1 = (1, Character "Count")
 > n2 = (2, Character "Danglars")
 > n3 = (3, Character "Calderrouse")
+> n4 = (4, Character "Morrel")
 
 > e1 = (1,2)
 > e2 = (1,3)
 > e3 = (2,1)
 > e4 = (3,1)
 > e5 = (2,3)
+> e6 = (3,2)
+> e7 = (1,4)
+> e8 = (4,1)
 
 > graph1 :: LitGraph
-> graph1 = mkGraph [n1,n2,n3] (labUEdges [e1,e2,e3,e4,e5])
+> graph1 = mkGraph [n1,n2,n3,n4] (labUEdges [e1,e2,e3,e4,e5,e6,e7,e8])

@@ -69,16 +69,18 @@ a 'while' loop.
 >          print g
 >          putStrLn "Menu Options"
 >          putStr ("\t1 - Add character to graph\n"
->                 ++ "\t2 - Export to *.dot file\n"
->                 ++ "\t3 - Load graph from LitGraph generated *.dot file\n"
->                 ++ "\t4 - quit\n> ")
+>                  ++ "\t2 - Remove character from graph\n"
+>                  ++ "\t3 - Export to *.dot file\n"
+>                  ++ "\t4 - Load graph from LitGraph generated *.dot file\n"
+>                  ++ "\t5 - quit\n> ")
 >          choice <- getLine
 >          case choice of
 >                      "1" -> addParams >>= \p ->
 >                             menu (uncurry addCharacter p g)
->                      "2" -> export g >> menu g
->                      "3" -> importDot >>= \g2 -> menu g2
->                      "4" -> putStrLn "Exiting menu..."
+>                      "2" -> rmCharacter g >>= \g2 -> menu g2
+>                      "3" -> export g >> menu g
+>                      "4" -> importDot >>= \g2 -> menu g2
+>                      "5" -> putStrLn "Exiting menu..."
 >                      _   -> putStrLn "Not a valid menu option." >>
 >                             menu g
 
@@ -101,6 +103,20 @@ Convert the input from a string into [Int]
 
 > toList   :: String -> [Int]
 > toList s = read ("[" ++ s ++ "]")
+
+Remove a character from the graph
+
+> rmCharacter   :: LitGraph -> IO LitGraph
+> rmCharacter g = putStr "Name of character to remove: " >>
+>                 getLine >>= \name ->
+>                 let n = rmCharByName name g in
+>                     case n of
+>                       (Just _, g1) -> return g1
+>                       (Nothing, _) -> rmFailed name g
+
+> rmFailed     :: String -> LitGraph -> IO LitGraph
+> rmFailed s g = putStr ("Character name \"" ++ s ++ "\" not found\n") >> 
+>                return g
 
 Write the graph out to a *.dot file.
 FIXME: Get input for more graph parameters like page size, rotation, etc.
