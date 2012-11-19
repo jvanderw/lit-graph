@@ -60,6 +60,8 @@ edges of the graph.
 
 > type LitGraph = Gr Character ()
 
+> type CharNode = LNode Character
+
 --------------------------------------------------------------------------------
 
 Utility functions
@@ -107,7 +109,7 @@ Adding characters.
 Create connections going both to and from the new character and the
 characters that they have been identified as being connected to.
 
-> addEdges        :: LNode Character 
+> addEdges        :: CharNode 
 >                    -> [Node]
 >                    -> LitGraph 
 >                    -> LitGraph
@@ -119,18 +121,24 @@ characters that they have been identified as being connected to.
 
 Removing characters from the graph
 
-> rmCharByName      :: String -> LitGraph -> (Maybe (LNode Character), LitGraph)
+> rmCharByName      :: String -> LitGraph -> (Maybe (CharNode), LitGraph)
 > rmCharByName s g = let r = getNodeByChar s g in
 >                        case r of
 >                          Just (n,c) -> (Just (n,c), snd (match n g))
 >                          Nothing    -> (Nothing, g)
 
-> getNodeByChar     :: String -> LitGraph -> Maybe (LNode Character)
-> getNodeByChar s g = find (\x -> isCharacterMatch s x) ns
+> getNodeByChar     :: String -> LitGraph -> Maybe (CharNode)
+> getNodeByChar s g = find (isCharacterMatch s) ns
 >     where ns = labNodes g
 
-> isCharacterMatch     :: String -> LNode Character -> Bool
+> isCharacterMatch     :: String -> CharNode -> Bool
 > isCharacterMatch s n = name (snd n) == s
+
+--------------------------------------------------------------------------------
+
+Functions to pull out data from the graph
+
+
 
 --------------------------------------------------------------------------------
 
@@ -155,13 +163,13 @@ file, pull out all the character nodes and add them to the graph.
 > nodeLabel   :: String -> String
 > nodeLabel s = filter (/= '"') (s =~ "\".*\"")
 
-> allNodes        :: [String] -> [LNode Character]
+> allNodes        :: [String] -> [CharNode]
 > allNodes []     = []
 > allNodes (x:xs) =   if isNode x
 >                     then (nodeNum x, Character (nodeLabel x)) : allNodes xs
 >                     else allNodes xs
 
-> addDotNodes :: LitGraph -> [LNode Character] -> LitGraph
+> addDotNodes :: LitGraph -> [CharNode] -> LitGraph
 > addDotNodes = foldl (flip insNode)
 
 Get the edges of the graph. We can use the existing addEdges function.
